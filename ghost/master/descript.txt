@@ -1,0 +1,16 @@
+charset,Shift_JIS
+
+type,ghost
+name,もす
+
+sakura.name,もす
+kero.name,なし
+
+craftman,tatakinov
+craftmanw,タタキノフ
+
+craftmanurl,https://tatakinov.github.io/
+
+sstp.allowunspecifiedsend,1
+
+shiori,kagari.dll

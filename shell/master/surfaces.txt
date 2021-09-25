@@ -1,0 +1,17 @@
+charset,UTF-8
+
+descript
+{
+  version,1
+}
+
+surface0
+{
+  element0,base,surface000.png,0,0
+}
+
+surface1
+{
+  element0,base,surface010.png,0,0
+}
+

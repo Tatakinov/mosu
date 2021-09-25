@@ -1,0 +1,12 @@
+charset,UTF-8
+type,shell
+name,master
+
+craftman,tatakinov
+craftmanw,タタキノフ
+
+sakura.menu,auto
+char2.menu,hidden
+
+seriko.use_self_alpha,1
+

@@ -1,0 +1,6 @@
+charset,Shift_JIS
+
+type,ghost
+name,‚à‚·
+directory,mosu
+
