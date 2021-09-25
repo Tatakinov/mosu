@@ -83,6 +83,21 @@ return {
     end,
   },
   {
+    -- Sキーが押されたときの処理
+    -- 右クリックメニューから言語を変更するとメッセージも変わる
+    id  = "s_Key",
+    content = [[
+\0
+Japanese/Englishでないときはこのトークが呼ばれる。
+]],
+    content_Japanese = [[
+\0現在の言語: ${_Language}
+]],
+    content_English = [[
+\0Current language: ${_Language}
+]],
+  },
+  {
     -- Lキーが押されたときの処理
     id  = "l_Key",
     content = function(shiori,ref)
