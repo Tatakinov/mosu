@@ -5,13 +5,14 @@
 【制 作 者】タタキノフ
 【動作確認】Windows 10 and Wine 5.7以降 / SSP 2.5.06
 【配 布 元】https://tatakinov.github.io/
-【連 絡 先】tatakinov@gmail.com
+【連 絡 先】tatakinov_at_gmail.com
             https://twitter.com/tatakinov_ukgk
 
 
 ## ゴーストについて
 
 拙作栞Kagari及びサブシステムKotoriのサンプルゴーストです。
+きっとまだバグ多めなのでなんかうまく動かなかったらこの栞のバグです。
 
 
 ## ゴースト著作権について
@@ -33,7 +34,7 @@
 ただし二次創作物である旨を目につく場所に記載すること。
 
 [7.追加シェル、バルーン等を配布される]
-
+○
 
 [8.マスターシェル、バルーン等を改変したものを配布される]（7がOKの人のみ）
 ○
@@ -82,11 +83,16 @@
 以下のライブラリ/ソフトウェアを使用しています。
 それぞれのライセンス詳細はLICENSE.txtを参照してください。
 
-Lua         | https://www.lua.org/
-sol2        | https://github.com/ThePhD/sol2/
-luautf8     | https://github.com/starwing/luautf8/
-luaex       | https://github.com/LuaDist/luaex/
-Luachild    | https://github.com/pocomane/luachild/
+Lua           | https://www.lua.org/
+sol2          | https://github.com/ThePhD/sol2/
+luautf8       | https://github.com/starwing/luautf8/
+luaex         | https://github.com/LuaDist/luaex/
+Luachild      | https://github.com/pocomane/luachild/
+luacheck      | https://github.com/mpeterv/luacheck/
+argparse      | https://github.com/mpeterv/argparse
+luafilesystem | https://github.com/keplerproject/luafilesystem/
+lanes         | https://github.com/LuaLanes/lanes
+luasocket     | https://github.com/diegonehab/luasocket
 
 
 ## 参考にしたあれこれ
