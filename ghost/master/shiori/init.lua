@@ -261,14 +261,21 @@ function M:_talk(id, ...)
   else
     tbl = Misc.toArray(Misc.toArgs(...))
   end
+  local language  = self.var("_Language") or ""
   --print("shiori:talk:     " .. tostring(id))
   --print("shiori:talk.tbl: " .. type(tbl))
   local talk = self._chain[id]
   if talk == nil or coroutine.status(talk.content) == "dead" then
     talk  = self._data:get(id) or {}
-    if type(talk.content) == "function" then
+    local content = talk["content_" .. language] or talk.content
+    if type(content) == "function" then
       talk  = {
-        content = coroutine.create(talk.content),
+        content = coroutine.create(content),
+        passthrough = talk.passthrough,
+      }
+    else
+      talk  = {
+        content = content,
         passthrough = talk.passthrough,
       }
     end
@@ -287,11 +294,10 @@ function M:_talk(id, ...)
       str:append([[\_?]]):append(s):append([[\_?\n]])
     end
     str:append([[\_q]])
-    return {
-      Value = str:tostring(),
-      ErrorLevel  = "warning",
-      ErrorDescription  = string.gsub(err, "\n", " | "),
-    }, true
+    str.Value = str:tostring()
+    str.ErrorLevel  = "warning"
+    str.ErrorDescription  = string.gsub(err, "\n", " | ")
+    return str, true
   end
   return value, talk.passthrough
 end
