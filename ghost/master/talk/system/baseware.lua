@@ -114,5 +114,12 @@ return {
       return shiori:talk(p .. c .. "なで")
     end,
   },
+  {
+    id  = "OnLanguageChange",
+    content = function(shiori, ref)
+      local __  = shiori.var
+      __("_Language", ref[0])
+    end,
+  },
 }
 
