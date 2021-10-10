@@ -1,4 +1,1 @@
-shogiƒtƒHƒ‹ƒ_“à‚Ì‰æ‘œ‚Ì“àA•¶Žš“ü‚è‚Ì‰æ‘œ‚É‚Í‚·‚×‚ÄM+ BITMAP FONT‚ðŽg—p‚µ‚Ä‚¢‚Ü‚·B
-menu‚Ì‰æ‘œ‚Í
-sidebar.png‚É‚Ý‚©‚¿‚á‚ñƒtƒHƒ“ƒg
-foreground*.png,background*.png‚ÉM+ BITMAPƒtƒHƒ“ƒg‚ðŽg—p‚µ‚Ä‚¢‚Ü‚·B
+ã‚·ã‚§ãƒ«ã«åŒè¦‹é…”æ§˜ ã€Œã«ã—ãã€ã‚’ä½¿ç”¨ã—ã¦ã„ã¾ã™ã€‚
