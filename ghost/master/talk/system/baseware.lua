@@ -110,7 +110,6 @@ return {
       local p = ref[0] or ""
       local c = ref[1] or ""
       local n = tonumber(ref[2]) or 0
-      print(p .. c .. "Nade" .. n)
       return shiori:talk(p .. c .. "なで")
     end,
   },
@@ -119,6 +118,7 @@ return {
     content = function(shiori, ref)
       local __  = shiori.var
       __("_Language", ref[0])
+      shiori:setLanguage(ref[0])
     end,
   },
 }
