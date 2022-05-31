@@ -91,8 +91,11 @@ Luachild      | https://github.com/pocomane/luachild/
 luacheck      | https://github.com/mpeterv/luacheck/
 argparse      | https://github.com/mpeterv/argparse
 luafilesystem | https://github.com/keplerproject/luafilesystem/
-lanes         | https://github.com/LuaLanes/lanes
-luasocket     | https://github.com/diegonehab/luasocket
+lanes         | https://github.com/LuaLanes/lanes/
+luasocket     | https://github.com/lunarmodules/luasocket/
+openssl       | https://www.openssl.org/
+luasec        | https://github.com/brunoos/luasec/
+json.lua      | https://github.com/rxi/json.lua
 
 
 ## éQçlÇ…ÇµÇΩÇ†ÇÍÇ±ÇÍ
