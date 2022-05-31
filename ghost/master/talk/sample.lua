@@ -1,8 +1,49 @@
 -- 必要なモジュールをロード
-local Misc  = require("shiori.misc")
+local Misc  = require("ukagaka_misc")
 local Util  = require("talk._util")
 local Math  = require("lib_sample")
 local Lanes = require("lanes").configure()
+local HTTP  = require("socket.http")
+local LTN12 = require("ltn12")
+local Json  = require("json")
+
+
+local function dump(obj, indent)
+  indent  = indent or ""
+  local obj_type  = type(obj)
+  if obj_type == "boolean" or obj_type == "number" then
+    return tostring(obj)
+  elseif obj_type == "string" then
+    -- Note:
+    -- luaのqでは制御文字をエスケープする処理が行われるが
+    -- 制御文字の範囲が0x00-0x1f,0x7fに加えて
+    -- 0x80-0x9fも含まれており、これがUTF-8のマルチバイト文字の
+    -- 2byte目以降(0x80-0xbf)に重なっているため、
+    -- 不必要なエスケープ処理が行われてしまう。
+    -- これを元に戻す処理を行っているが、( \128 -> [0x80] )
+    -- エスケープの後にこれらの文字が来た場合を想定していないため、
+    -- ( \\128 -> \[0x80] )
+    -- のようになってしまうことに注意。
+    local str = string.format("%q", obj)
+    str = str:gsub("\\(%d%d%d)", function(num)
+      local n = tonumber(num)
+      if n >= 0x80 then
+        return string.format("%s", string.char(n))
+      else
+        return string.format("\\%s", num)
+      end
+    end)
+    return str
+  elseif obj_type == "table" then
+    local str = "{\n"
+    for k, v in pairs(obj) do
+      str = str .. indent .. "  " .. "[" .. dump(k, indent .. "  ") .. "]=" .. dump(v, indent .. "  ") .. ",\n"
+    end
+    str = str .. indent .. "}"
+    return str
+  end
+  return tostring(nil)
+end
 
 return {
   {
@@ -11,7 +52,6 @@ return {
   },  -- ←の「,」は必須
   {
     -- 変数の初期化等を行うイベント
-    -- すべての辞書が読み込まれた直後に呼ばれる
     id  = "OnInitialize",
     content = function(shiori,ref)
       -- 通常の初期化
@@ -49,10 +89,10 @@ return {
     id  = "OnClose",
     -- もちろん複数行文字列もOK
     -- 「\-」は自分で入れないとダメ
-    content = [[
-\0
-またね〜\w9\w9\-
-]],
+    content = function(shiori, ref)
+      local _T  = shiori.i18n
+      return _T("goodbye")
+    end,
   },
   {
     id  = "OnSecondChange",
@@ -123,10 +163,10 @@ Japanese/Englishでないときはこのトークが呼ばれる。
       local __  = shiori.var
       -- マルチスレッドで1秒後に"SSTPのテスト"と表示させる
       local f = Lanes.gen("*", {required = {}}, function(unique_id)
-        local SSTP  = require("sstp")
+        local Misc  = require("ukagaka_misc")
         -- luaにはsleepする方法がないのでpingで代替
         os.execute("ping -n 2 localhost")
-        SSTP.speak(unique_id,"SSTPのテスト\\e")
+        Misc.speak(unique_id, "SSTPのテスト\\e")
       end)
       -- 子スレッド側にunique_idを渡す。
       f(__("_uniqueid"))
@@ -139,6 +179,67 @@ Japanese/Englishでないときはこのトークが呼ばれる。
     content = function(shiori,ref)
       -- メニューを表示する
       return shiori:talk("OnMenu")
+    end,
+  },
+  {
+    -- Fキーが押されたときの処理
+    id  = "f_Key",
+    content = function(shiori,ref)
+      -- FMOを取得する
+      -- SHIORIがUTF-8出力なのでSakuraUnicodeを利用する方が良さそう
+      local fmo = Misc.getFMO("SakuraUnicode")
+      fmo = string.gsub(fmo, string.char(0x01), ",")
+      fmo = string.gsub(fmo, [[\]], [[\\]])
+      fmo = string.gsub(fmo, string.char(0x0d, 0x0a), [[\n]])
+      return [[
+\0
+FMOを取得したよ。\n
+\n
+\_q
+]] .. fmo .. [[\_q]]
+    end,
+  },
+  {
+    -- Hキーが押されたときの処理
+    id  = "h_Key",
+    content = function(shiori,ref)
+      -- JSONのサンプル
+      local t = {}
+      HTTP.request({
+        method  = "GET",
+        url = "https://httpbin.org/headers",
+        sink  = LTN12.sink.table(t)
+      })
+      --[[ POSTの場合
+      -- HTTP.request({
+      --   method = "POST",
+      --   url = "http://example.com/",
+      --   headers = {
+      --     ["Content-Type"] = "application/x-www-form-urlencoded",
+      --   },
+      --   source = LTN12.source.string("key1=value1"),
+      --   sink = LTN12.sink.table(t),
+      -- })
+      -- のようにする。
+      -- 詳しくは
+      -- https://lunarmodules.github.io/luasocket/
+      -- のreferenceを読むこと。
+      --]]
+      -- 受信したデータをtable->stringへ変換
+      local json  = table.concat(t)
+      t = Json.decode(json)
+      local str = dump(t, "")
+      -- 改行を\nに置換
+      str = string.gsub(str, "\r\n", "\\n")
+      str = string.gsub(str, "\r", "\\n")
+      str = string.gsub(str, "\n", "\\n")
+      return [[
+\0
+jsonのテストだよ。\n
+受信したJSONは\n
+\_q]] .. str .. [[\_q\n
+で、headers["User-Agent"]の値は\n
+\_q]] .. t["headers"]["User-Agent"] .. [[\_q\nだよ。]]
     end,
   },
   {
@@ -308,19 +409,21 @@ Ouch!\w9\w9\w9\n
     id  = "sakura.recommendsites",
     -- recommendsitesやportalsitesの生成には
     -- createURLList関数を用いると楽。
-    content = Misc.createURLList(
-    {
-      {"独立伺か研究施設 ばぐとら研究所", "http://ssp.shillest.net/"},
-      -- セパレーター
-      {"-", "-", "-"},
-      {"The Programming Language Lua", "https://www.lua.org/"},
-    }),
+    content = function(shiori, ref)
+      return shiori:createURLList(
+        {
+          {"独立伺か研究施設 ばぐとら研究所", "http://ssp.shillest.net/"},
+          -- セパレーター
+          {"-", "-", "-"},
+          {"The Programming Language Lua", "https://www.lua.org/"},
+        })
+    end,
   },
   -- ここからSHIORIの情報なので弄らない
   {
     passthrough = true,
     id  = "version",
-    content = "1.0.3",
+    content = "1.1.0",
   },
   {
     passthrough = true,
