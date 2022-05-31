@@ -1,15 +1,16 @@
-local Class       = require("class")
-local Trie        = require("trie")
-local Misc        = require("shiori.misc")
-local Module    = require("ukagaka_module.shiori")
-local Path  = require("path")
-local Protocol  = Module.Protocol
-local Request   = Module.Request
-local Response  = Module.Response
-local SaoriCaller = require("saori_caller")
+local Class         = require("class")
+local Trie          = require("trie")
+local Misc          = require("shiori.misc")
+local Module        = require("ukagaka_module.shiori")
+local Path          = require("path")
+local Protocol      = Module.Protocol
+local Request       = Module.Request
+local Response      = Module.Response
+local SaoriCaller   = require("saori_caller")
 local StringBuffer  = require("string_buffer")
-local Talk        = require("shiori.talk")
-local Variable    = require("shiori.variable")
+local Talk          = require("shiori.talk")
+local I18N          = require("shiori.i18n")
+local Variable      = require("shiori.variable")
 
 local M = Class()
 M.__index = M
@@ -30,6 +31,7 @@ function M:_init()
   self._reserve = {}
 
   self.var  = Variable()
+  self.i18n = I18N()
 
   self._data   = Talk()
 
@@ -75,9 +77,13 @@ function M:load(path)
       for _, v in ipairs(t) do
         --print("talk: " .. _)
         --print("id:   " .. tostring(v.id))
-        self._data:add(v)
-        if v.anchor then
-          self._trie:add(v.id)
+        if v.i18n then
+          self.i18n:add(v)
+        else
+          self._data:add(v)
+          if v.anchor then
+            self._trie:add(v.id)
+          end
         end
       end
     end
@@ -111,13 +117,28 @@ function M:load(path)
   else
     -- TODO error
   end
-  self:talk("OnInitialize")
+  self:talk("OnDictionaryLoaded")
 end
 
 function M:unload()
   print("unload")
   self.var:save()
   self._saori:unloadall()
+end
+
+local function extractHeaders(obj)
+  local t = {
+    Value             = obj.Value,
+    ValueNotify       = obj.ValueNotify,
+    ErrorLevel        = obj.ErrorLevel,
+    ErrorDescription  = obj.ErrorDescription,
+  }
+  for k, v in pairs(obj) do
+    if string.match(k, "^X%-SSTP%-PassThru%-") then
+      t[k]  = v
+    end
+  end
+  return t
 end
 
 function M:request(req)
@@ -159,8 +180,11 @@ function M:request(req)
       res:message("OK")
       tbl.Value = value
     end
+    --[[
     -- X-SSTP-PassThru-*への暫定的な対応
-    for k, v in pairs(tbl) do
+    --]]
+    local headers = extractHeaders(tbl)
+    for k, v in pairs(headers) do
       res:header(k, v)
     end
   end
@@ -380,6 +404,31 @@ function M:saori(id)
     }
     return setmetatable(t, mt)
   end
+end
+
+function M:setLanguage(language)
+  self.i18n:set(language)
+end
+
+local b1  = string.char(0x01)
+local b2  = string.char(0x02)
+function M:createURLList(tbl)
+  local list  = {}
+  for _, v in ipairs(tbl) do
+    if type(v) ~= "table" or #v == 0 then
+      break
+    end
+    v[1]  = v[1] or ""
+    v[2]  = v[2] or ""
+    v[3]  = v[3] or ""
+    v[4]  = v[4] or ""
+    table.insert(list, table.concat(v, b1))
+  end
+  local str = table.concat(list, b2)
+  if str and #str > 0 then
+    return str
+  end
+  return nil
 end
 
 return M
