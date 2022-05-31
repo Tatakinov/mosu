@@ -65,16 +65,7 @@ socket          -- tcp/udpの通信を行える。
                 -- を参照のこと。
 
 
-sstp            -- SSTPを送りつける。
-                -- UNIQUE IDにはbasewareから送られてきたものを代入すること。
-                -- 一応デフォルトでshiori:property()から取得できる。
-                -- 参考URL http://ssp.shillest.net/ukadoc/manual/list_shiori_event.html#uniqueid
-
-local SSTP  = require("sstp")
-SSTP.speak("UNIQUE ID", "\\0\\s[0]テスト")
-SSTP.speak(shiori:property("uniqueid"), "\\0\\s[0]テスト")
-SSTP.send("UNIQUE ID", "NOTIFY SSTP/1.0\r\nCharset: Shift_JIS\r\nEvent: OnBoot\r\n\r\n")
-SSTP.send(shiori:property("uniqueid"), "NOTIFY SSTP/1.0\r\nCharset: Shift_JIS\r\nEvent: OnBoot\r\n\r\n")
+sstp            -- ukagaka_miscへ機能を移動した。
 
 
 string_buffer   -- 文字列連結演算子を大量に行うと処理が滞るので対処したやつ。
@@ -90,4 +81,17 @@ print(str:tostring()) -- "いろはにほへとちりぬるを"
 
 
 trie            -- 自動アンカーの処理で使う。trie木みたいな何か。
+
+
+ukagaka_misc    -- SSTPのやりとりやFMOの取得などを扱う。
+                -- UNIQUE IDにはbasewareから送られてきたものを代入すること。
+                -- 参考URL http://ssp.shillest.net/ukadoc/manual/list_shiori_event.html#uniqueid
+
+local Misc  = require("sstp")
+Misc.speak("UNIQUE ID", "\\0\\s[0]テスト")
+Misc.speak(shiori.var("_uniqueid"), "\\0\\s[0]テスト")
+Misc.sendSSTP("UNIQUE ID", "NOTIFY SSTP/1.0\r\nCharset: Shift_JIS\r\nEvent: OnBoot\r\n\r\n")
+Misc.sendSSTP(shiori.var("_uniqueid"), "NOTIFY SSTP/1.0\r\nCharset: Shift_JIS\r\nEvent: OnBoot\r\n\r\n")
+local fmo = Misc.getFMO("SakuraUnicode")
+
 ukagaka_module  -- SSTPな文字列生成などに使う。
