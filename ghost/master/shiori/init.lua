@@ -1,4 +1,5 @@
 local Class         = require("class")
+local Config        = require("shiori.config")
 local Trie          = require("trie")
 local Misc          = require("shiori.misc")
 local Module        = require("ukagaka_module.shiori")
@@ -22,6 +23,7 @@ function M:_init()
   self._name    = "Kagari/Kotori"
 
   self._trie          = Trie()
+  self._replace       = {}
   self._replace_trie  = Trie()
   for _, v in ipairs({"[", "]", "\\_a", "\\__q"}) do
     self._trie:add(v)
@@ -29,6 +31,8 @@ function M:_init()
   end
   self._saori      = SaoriCaller()
   self._reserve = {}
+
+  self._external_allow_list = {}
 
   self.var  = Variable()
   self.i18n = I18N()
@@ -90,33 +94,24 @@ function M:load(path)
     end
   end)
 
-  self._saori:load(path, self:talk("name"))
+  self._config  = Config.load(path)
+
+  self._saori:load(path, self:talk("name"), self._config.SAORI)
   self._saori:loadall()
 
+  for _, v in ipairs(self._config.External) do
+    self._external_allow_list[v]  = true
+  end
+
   --置換の読み込み
-  local conf_file_name  = "replace.conf"
-  local CRLF  = string.char(0x0d, 0x0a)
-  local CR  = string.char(0x0d)
-  local LF  = string.char(0x0a)
-  self.replace  = {}
-  local fh    = io.open(path .. conf_file_name, "r")
-  if fh then
-    local data  = fh:read("*a")
-    fh:close()
-    --  改行文字をLFへ
-    data  = string.gsub(data, CRLF, LF)
-    data  = string.gsub(data, CR, LF)
-    for line in string.gmatch(data, "([^" .. LF .. "]+)") do
-      local before, after = string.match(line, "(.+),(.+)")
-      if before and after then
-        self.replace[before]  = after
-        self._replace_trie:add(before)
-      else
-        -- TODO error
-      end
+  for _, v in ipairs(self._config.Replace) do
+    local before, after = v.before, v.after
+    if before and after then
+      self._replace[before]  = after
+      self._replace_trie:add(before)
+    else
+      -- TODO error
     end
-  else
-    -- TODO error
   end
   self:talk("OnDictionaryLoaded")
 end
@@ -153,10 +148,12 @@ function M:request(req)
   end
 
   local id  = req:header("ID")
+  local security_level  = req:header("SecurityLevel") or ""
   if id == nil then
     -- TODO comment
     -- print("nil ID: " .. tostring(id))
-  else
+  elseif string.lower(security_level) == "local" or
+      self._external_allow_list[id] then
     local value, passthrough = self:_talk(id, req:headers())
     -- X-SSTP-PassThru-*への暫定的な対応
     local tbl = {}
@@ -164,12 +161,17 @@ function M:request(req)
       tbl   = value
       value = value.Value
     end
-    if value then
-      --value = string.gsub(value, "\x0d\x0a", "")
-      value = string.gsub(value, "\x0d", "")
-      value = string.gsub(value, "\x0a", "")
+    if id == "OnTranslate" then
+      value = value or req:header("Reference0")
+      -- 末尾が\\e => passthroughでない、なら自動置換を実行する
+      local passthrough = false
+      local id  = req:header("Reference2")
+      if id then
+        local talk  = self._data:get(id) or {}
+        passthrough = talk.passthrough
+      end
       -- SHIORI Resource他置換しないトークには置換や末尾\eの追加を行わない
-      if not(passthrough) then
+      if value and not(passthrough) then
         value = self:autoReplaceVars(value)
         value = self:autoLink(value)
         value = self:autoReplace(value)
@@ -177,6 +179,11 @@ function M:request(req)
         --  えんいーが既にあるかを調べるのは面倒いのでとりあえず付けておく。
         value = value .. "\\e"
       end
+    end
+    if value then
+      --value = string.gsub(value, "\x0d\x0a", "")
+      value = string.gsub(value, "\x0d", "")
+      value = string.gsub(value, "\x0a", "")
       res:code(200)
       res:message("OK")
       tbl.Value = value
@@ -256,7 +263,7 @@ function M:autoReplace(x)
       end
     else
       if _invalid == 0 then
-        return self.replace[str]
+        return self._replace[str]
       end
     end
     return str
