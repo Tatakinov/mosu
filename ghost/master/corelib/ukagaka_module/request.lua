@@ -1,8 +1,7 @@
 local Class     = require("class")
 local Headers   = require("ukagaka_module.headers")
 
-local M   = Class(Headers)
-M.__index = M
+local M   = Class.inheritance("ukagaka_module.headers")
 
 local CRLF  = string.char(0x0d, 0x0a)
 
@@ -48,8 +47,8 @@ function M.parse(obj)
     end
     local _, pos  = string.find(obj, CRLF .. CRLF)
     assert(string.len(obj) == pos) --  今のところはCRLFCRLF以降にメッセージは無い...はず
-    req = M(req.method, req.command, req.version,
-        Headers.parse(string.sub(obj, string.len(line) + 1, pos)):headers())
+    req = Class(M)(req.method, req.command, req.version,
+        Headers.class().parse(string.sub(obj, string.len(line) + 1, pos)):headers())
     return req
   end
   return nil
@@ -70,4 +69,4 @@ function M:tostring()
   return str
 end
 
-return M
+return Class(M)

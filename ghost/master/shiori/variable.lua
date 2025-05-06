@@ -4,8 +4,8 @@ local Misc  = require("shiori.misc")
 local FILE_NAME = "kagari_save.lua"
 local file_path = nil
 
-local M = Class()
-M.__index = M
+local M = {}
+
 M.__call  = function(self, key, ...)
   local ret = self._data[key]
   if select("#", ...) > 0 then
@@ -59,4 +59,4 @@ function M:save()
   return false
 end
 
-return M
+return Class(M)

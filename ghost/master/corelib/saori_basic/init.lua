@@ -7,8 +7,7 @@ local Process   = require("process")
 local Protocol  = Module.Protocol
 local Response  = Module.Response
 
-local M   = Class()
-M.__index = M
+local M   = {}
 
 function M:_init(path, sender)
   self._path    = path
@@ -47,4 +46,4 @@ function M:unload()
   return true
 end
 
-return M
+return Class(M)

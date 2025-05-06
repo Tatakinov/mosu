@@ -12,6 +12,8 @@ function M.conv(input, to, from)
       tbl[k]  = 932
     elseif v == "UTF-8" then
       tbl[k]  = 65001
+    else
+      tbl[k]  = 0 -- ANSI
     end
   end
 

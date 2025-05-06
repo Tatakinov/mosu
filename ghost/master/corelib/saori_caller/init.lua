@@ -4,8 +4,7 @@ local SaoriUniversal  = require("saori_universal")
 local Module    = require("ukagaka_module.saori")
 local Protocol  = Module.Protocol
 
-local M = Class()
-M.__index = M
+local M = {}
 
 function M:load(base, sender, list)
   self.base   = base
@@ -74,4 +73,4 @@ function M:get(tag)
   return self.lib[tag]
 end
 
-return M
+return Class(M)

@@ -47,25 +47,8 @@ function M.load(path)
 end
 
 function M.request(str)
-  local req = Request.parse(str)
-  --local s, res  = pcall(shiori.request, shiori, req)
+  local req = Request.class().parse(str)
   local res = shiori:request(req)
-  --[[
-  if not(s) then
-    local err = res
-    local res = Response(204, "No Content", Protocol.v30, {
-      Charset = shiori.charset,
-      Sender  = shiori.name,
-    })
-    if err then
-      -- TODO SHIORI/2.x
-      res:code(200)
-      res:message("OK")
-      res:header("Value", string.gsub(err, "\\", "\\\\") .. "\\e")
-    end
-    return res:tostring()
-  end
-  --]]
   return res:tostring()
 end
 

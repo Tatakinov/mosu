@@ -1,8 +1,7 @@
 local Class     = require("class")
 local Headers   = require("ukagaka_module.headers")
 
-local M   = Class(Headers)
-M.__index = M
+local M   = Class.inheritance("ukagaka_module.headers")
 
 local CRLF  = string.char(0x0d, 0x0a)
 
@@ -52,8 +51,8 @@ function M.parse(obj)
     res.protocol, res.code, res.message = string.gmatch(line, "(%w+/%d%.%d) (%d+) (.+)" .. CRLF)()
     local _, pos  = string.find(obj, CRLF .. CRLF)
     --assert(string.len(obj) == pos) --  今のところはCRLFCRLF以降にメッセージは無い...はず
-    res = M(res.code, res.message, res.protocol,
-        Headers.parse(string.sub(obj, string.len(line) + 1, pos)):headers())
+    res = Class(M)(res.code, res.message, res.protocol,
+        Headers.class().parse(string.sub(obj, string.len(line) + 1, pos)):headers())
     return res
   end
   return nil
@@ -80,4 +79,4 @@ function M:tostring()
   return str
 end
 
-return M
+return Class(M)

@@ -2,9 +2,7 @@ local Class         = require("class")
 local StringBuffer  = require("string_buffer")
 local utf8          = require("lua-utf8")
 
-local M = Class()
-
-M.__index = M
+local M = {}
 
 function M:_init()
   self.tree = {}
@@ -108,4 +106,4 @@ function M:gsub(str, replace)
   return buffer:tostring()
 end
 
-return M
+return Class(M)

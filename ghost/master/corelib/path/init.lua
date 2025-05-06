@@ -13,6 +13,27 @@ function M.basename(path)
   return match or path
 end
 
+function M.dirname(path)
+  local reverse = string.reverse(path)
+  local pos = -1
+  if string.sub(package.config, 1, 1) == "\\" then
+    local p1 = string.find(reverse, "\\") or #reverse + 1
+    local p2 = string.find(reverse, "/") or #reverse + 1
+    local min = p1 < p2 and p1 or p2
+    if min <= #reverse then
+      pos = min
+    end
+  else
+    pos = string.find(reverse, "/") or -1
+  end
+  if pos > 0 then
+    local dirname = string.sub(path, 1, -pos)
+    --print("dirname: " .. dirname)
+    return dirname
+  end
+  return nil
+end
+
 function M.normalize(path)
   -- TODO stub
   return path

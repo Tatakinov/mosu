@@ -1,7 +1,6 @@
 local Class = require("class")
 
-local M   = Class()
-M.__index = M
+local M   = {}
 
 function M:_init()
   self._data = {}
@@ -32,4 +31,4 @@ function M:rawget(id)
   return self._data[id]
 end
 
-return M
+return Class(M)

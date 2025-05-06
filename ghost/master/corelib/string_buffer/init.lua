@@ -1,7 +1,6 @@
 local Class = require("class")
-local M = Class()
+local M = {}
 
-M.__index = M
 M.__tostring  = function(self)
   return self:tostring()
 end
@@ -52,4 +51,4 @@ function M:strlen()
   return self.length
 end
 
-return M
+return Class(M)

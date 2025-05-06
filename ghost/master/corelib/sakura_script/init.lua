@@ -4,7 +4,7 @@ local Shape         = require("sakura_script.shape")
 local Render        = require("sakura_script.render")
 local StringBuffer  = require("string_buffer")
 
-local M = Class()
+local M = {}
 
 M.Color   = Color
 M.Shape   = Shape
@@ -385,4 +385,4 @@ function M:tostring()
   return s
 end
 
-return M
+return Class(M)

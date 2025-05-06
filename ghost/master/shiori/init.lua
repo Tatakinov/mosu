@@ -13,8 +13,7 @@ local Talk          = require("shiori.talk")
 local I18N          = require("shiori.i18n")
 local Variable      = require("shiori.variable")
 
-local M = Class()
-M.__index = M
+local M = {}
 
 function M:_init()
   math.randomseed(os.time())
@@ -441,4 +440,4 @@ function M:createURLList(tbl)
   return nil
 end
 
-return M
+return Class(M)

@@ -11,13 +11,13 @@ local Protocol  = Module.Protocol
 local Request   = Module.Request
 local Response  = Module.Response
 
-local M   = Class()
-M.__index = M
+local M   = {}
 
 function M:_init(path, sender)
-  self.path   = path
-  self.sender = sender
-  self.native = Native(path)
+  self.path     = path
+  self.sender   = sender
+  self.native   = Native(path)
+  self.charset  = nil
 end
 
 function M:load()
@@ -56,15 +56,25 @@ function M:request(...)
     end
   end
   req:header("Sender", self.sender)
-  req:header("Charset", "Shift_JIS")
+  if self.charset then
+    req:header("Charset", self.charset)
+  else
+    req:header("Charset", "UTF-8")
+  end
   req:header("SecurityLevel", "Local")
   --print("Request:")
   --print(req:tostring())
   local str = req:tostring()
-  str = Conv.conv(str, "cp932", "UTF-8") or str
+  if self.charset and self.charset ~= "UTF-8" then
+    str = Conv.conv(str, self.charset, "UTF-8") or str
+  end
   local ret = self.native:request(str)
-  ret = Conv.conv(ret, "UTF-8", "cp932") or ret
-  local res = Response.parse(ret)
+  local tmp = Response.class().parse(ret)
+  self.charset = tmp:header("Charset") or "UTF-8"
+  if self.charset and self.charset ~= "UTF-8" then
+    ret = Conv.conv(ret, "UTF-8", self.charset) or ret
+  end
+  local res = Response.class().parse(ret)
   res:request(req)
   return res
 end
@@ -74,4 +84,4 @@ function M:unload()
   return ret
 end
 
-return M
+return Class(M)

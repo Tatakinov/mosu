@@ -1,7 +1,6 @@
 local Class = require("class")
 
-local M   = Class()
-M.__index = M
+local M   = {}
 
 local CRLF  = string.char(0x0d, 0x0a)
 
@@ -35,7 +34,7 @@ function M.parse(obj)
         ret[k]  = v
       end
     end
-    return M(ret)
+    return Class(M)(ret)
   end
   return nil
 end
@@ -49,4 +48,4 @@ function M:tostring()
   return table.concat(tbl, "")
 end
 
-return M
+return Class(M)

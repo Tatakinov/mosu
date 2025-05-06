@@ -1,7 +1,7 @@
 local Class = require("class")
 
-local M = Class()
-M.__index = M
+local M = {}
+
 M.__call  = function(self, id)
   return assert(self._data[id][self._language])
 end
@@ -23,4 +23,4 @@ function M:add(data)
   end
 end
 
-return M
+return Class(M)
